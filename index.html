@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>100 Ways to Say Sorry  Sundas</title>
+  <title>100 Ways to Say Sorry</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -15,6 +15,7 @@
       align-items: center;
       min-height: 100vh;
       overflow: hidden;
+      user-select: none;
     }
     #canvas-container {
       position: relative;
@@ -22,11 +23,23 @@
       height: 100vmin;
       max-width: 800px;
       max-height: 800px;
+      cursor: pointer;
     }
     canvas {
       width: 100%;
       height: 100%;
       display: block;
+    }
+    .hint-text {
+      position: absolute;
+      bottom: 15px;
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      color: #D4AF37;
+      opacity: 0.6;
+      font-style: italic;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -34,6 +47,7 @@
 
   <div id="canvas-container">
     <canvas id="wheelCanvas" width="800" height="800"></canvas>
+    <div class="hint-text">Tap anywhere to Pause / Resume</div>
   </div>
 
   <script>
@@ -45,7 +59,7 @@
       "I take full responsibility", "That was my mistake",
       "I should have listened", "I see my fault now",
       "I'm truly sorry", "I didn't mean to hurt you", "I messed up",
-      "I'll make this right", "I was  thinking of you",
+      "I'll make this right", "I was not thinking of you",
       "I should have been there", "I'm sorry I was selfish",
       "I'm sorry I reacted that way", "I ignored what you needed",
       "I wasn't honest", "I'm sorry for yelling",
@@ -59,6 +73,7 @@
       "I broke my promise", "I'm sorry I forgot",
       "I let you down", "I took it out on you",
       "I made it about me", "I'm sorry I was distant",
+      "I'm sorry I ruined our plans", "I shouldn't have lied",
       "I'm sorry jan", "Balaj ki jaan",
       "I took your patience for granted", "I was careless",
       "I made a poor choice", "I didn't see your side",
@@ -67,7 +82,6 @@
       "I took you for granted", "I'm sorry I was careless",
       "I was too proud to say it", "I'm sorry I wasn't listening",
       "I should have trusted you", "No excuse, I just failed",
-      "I'm sorry I said that to you", "I took it too far",
       "I'm sorry I broke my promise", "I made you feel alone",
       "I'm here to listen now", "I'll do better, I promise",
       "I took my anger out on you", "I made things worse",
@@ -92,16 +106,25 @@
       "I love you, and I'm sorry", "I'm sorry. Always."
     ];
 
-    const cx = 400, cy = 400, rInner = 130, num = PHRASES.length;
+    const cx = 400, cy = 400, rInner = 150, num = PHRASES.length;
     let curIndex = 0;
     let tick = 0;
+    let isPaused = false;
 
-    const stars = Array.from({ length: 100 }, () => ({
+    // Stars & Hearts
+    const particles = Array.from({ length: 110 }, () => ({
       x: Math.random() * 800,
       y: Math.random() * 800,
       r: Math.random() * 1.5 + 0.5,
-      alpha: Math.random()
+      alpha: Math.random(),
+      isHeart: Math.random() < 0.2,
+      speed: Math.random() * 0.3 + 0.1
     }));
+
+    // Pause toggle
+    canvas.parentElement.addEventListener('click', () => {
+      isPaused = !isPaused;
+    });
 
     function getSpokeColor(index) {
       if (index > curIndex) return '#2E1A47';
@@ -111,16 +134,35 @@
       return '#D4AF37';
     }
 
+    function drawHeart(x, y, size, alpha) {
+      ctx.save();
+      ctx.fillStyle = `rgba(224, 122, 95, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x - size/2, y, size/2, Math.PI, 0, false);
+      ctx.arc(x + size/2, y, size/2, Math.PI, 0, false);
+      ctx.lineTo(x, y + size);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
     function draw() {
       ctx.fillStyle = '#110726';
       ctx.fillRect(0, 0, 800, 800);
 
-      // Stars
-      stars.forEach(s => {
-        ctx.fillStyle = `rgba(226, 223, 210, ${s.alpha})`;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
+      // Floating Particles
+      particles.forEach(p => {
+        p.y -= p.speed;
+        if (p.y < 0) p.y = 800;
+
+        if (p.isHeart) {
+          drawHeart(p.x, p.y, 2.5, p.alpha);
+        } else {
+          ctx.fillStyle = `rgba(226, 223, 210, ${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
       });
 
       // Center ring
@@ -130,23 +172,26 @@
       ctx.arc(cx, cy, rInner - 5, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Text headers
+      // Title
       ctx.textAlign = 'center';
       ctx.fillStyle = '#D4AF37';
-      ctx.font = 'bold 12px Georgia';
+      ctx.font = 'bold 11px Georgia';
       ctx.fillText('100 WAYS TO SAY', cx, cy - 70);
-      ctx.fillText('SORRY', cx, cy - 52);
+      ctx.font = 'bold 13px Georgia';
+      ctx.fillText('SORRY SUNDAS', cx, cy - 52);
 
       // Active text
       ctx.fillStyle = '#E2DFD2';
-      ctx.font = 'bold 18px Georgia';
+      ctx.font = 'bold 17px Georgia';
       ctx.fillText(`"${PHRASES[curIndex]}"`, cx, cy);
 
+      // Subtitle
       ctx.fillStyle = '#D4AF37';
-      ctx.font = 'italic 12px Georgia';
-      ctx.fillText(`Nº ${String(curIndex + 1).padStart(3, '0')}`, cx, cy + 60);
+      ctx.font = 'italic 11px Georgia';
+      const statusText = isPaused ? "PAUSED" : "FOR SUNDAS";
+      ctx.fillText(`Nº ${String(curIndex + 1).padStart(3, '0')} • ${statusText}`, cx, cy + 60);
 
-      // Spokes
+      // Radial Spokes
       PHRASES.forEach((phrase, i) => {
         const angle = -Math.PI / 2 + (i * 2 * Math.PI / num);
         ctx.save();
@@ -159,9 +204,12 @@
         ctx.restore();
       });
 
-      tick++;
-      if (tick % 16 === 0 && curIndex < num - 1) {
-        curIndex++;
+      // Speed & Pause Control
+      if (!isPaused) {
+        tick++;
+        if (tick % 18 === 0 && curIndex < num - 1) {
+          curIndex++;
+        }
       }
 
       requestAnimationFrame(draw);
