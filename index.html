@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>100 Ways to Say Sorry</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #110726;
+      color: #E2DFD2;
+      font-family: 'Georgia', serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vmin;
+      height: 100vmin;
+      max-width: 800px;
+      max-height: 800px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container">
+    <canvas id="wheelCanvas" width="800" height="800"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const PHRASES = [
+      "I'm so sorry", "I was wrong", "Please forgive me",
+      "I take full responsibility", "That was my mistake",
+      "I should have listened", "I see my fault now",
+      "I'm truly sorry", "I didn't mean to hurt you", "I messed up",
+      "I'll make this right", "I was not thinking of you",
+      "I should have been there", "I'm sorry I was selfish",
+      "I'm sorry I reacted that way", "I ignored what you needed",
+      "I wasn't honest", "I'm sorry for yelling",
+      "I hurt your feelings and I'm sorry", "You deserved better",
+      "I took you for granted", "I ruined things",
+      "I put my pride first", "I'm sorry I dismissed you",
+      "I handled it badly", "I'm ashamed of how I acted",
+      "I shouldn't have said that", "I made it about me",
+      "I was unfair to you", "I judged too quickly",
+      "I'm sorry I interrupted", "I non-listened",
+      "I broke my promise", "I'm sorry I forgot",
+      "I let you down", "I took it out on you",
+      "I made it about me", "I'm sorry I was distant",
+      "I'm sorry I ruined our plans", "I shouldn't have lied",
+      "I took your patience for granted", "I was careless",
+      "I made a poor choice", "I didn't see your side",
+      "I wasn't thinking straight", "I made you feel unsafe",
+      "I'm sorry I was late again", "I broke your trust",
+      "I took you for granted", "I'm sorry I was careless",
+      "I was too proud to say it", "I'm sorry I wasn't listening",
+      "I should have trusted you", "No excuse, I just failed",
+      "I'm sorry I said that to you", "I took it too far",
+      "I'm sorry I broke my promise", "I made you feel alone",
+      "I'm here to listen now", "I'll do better, I promise",
+      "I took my anger out on you", "I made things worse",
+      "Tell me how to fix it", "I'm sorry for the tears",
+      "You matter more than winning", "I can't lose you over this",
+      "I was defensive", "I'm sorry I wasn't clear",
+      "I wish I could take it back", "It was never your fault",
+      "Let's speak quietly", "I'm sorry I wasn't kind",
+      "You didn't deserve that", "I'm sorry I broke the mood",
+      "I made you doubt yourself", "I misunderstood you",
+      "I'm sorry I raised my voice", "I ruined the day",
+      "I'm sorry I was harsh", "I took it out on you",
+      "I'm sorry I overreacted", "I lost my cool",
+      "I'm sorry I lied", "I held a grudge",
+      "I'm sorry I hid the truth", "I made you feel small",
+      "I took you for granted", "I took it too far",
+      "I'm sorry for the bad timing", "I made you feel unsafe",
+      "Forgive me when you can", "I'm grateful for you",
+      "I'm ready to talk", "I'm sorry, I'm learning",
+      "I'm sorry I made it about me", "I'm sorry I broke your trust",
+      "I'm sorry I was wrong", "We can start over",
+      "I love you, and I'm sorry", "I'm sorry. Always."
+    ];
+
+    const cx = 400, cy = 400, rInner = 130, num = PHRASES.length;
+    let curIndex = 0;
+    let tick = 0;
+
+    const stars = Array.from({ length: 100 }, () => ({
+      x: Math.random() * 800,
+      y: Math.random() * 800,
+      r: Math.random() * 1.5 + 0.5,
+      alpha: Math.random()
+    }));
+
+    function getSpokeColor(index) {
+      if (index > curIndex) return '#2E1A47';
+      const t = index / num;
+      if (t < 0.33) return '#5C2A72';
+      if (t < 0.66) return '#E07A5F';
+      return '#D4AF37';
+    }
+
+    function draw() {
+      ctx.fillStyle = '#110726';
+      ctx.fillRect(0, 0, 800, 800);
+
+      // Stars
+      stars.forEach(s => {
+        ctx.fillStyle = `rgba(226, 223, 210, ${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Center ring
+      ctx.strokeStyle = '#D4AF37';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rInner - 5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Text headers
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 12px Georgia';
+      ctx.fillText('100 WAYS TO SAY', cx, cy - 70);
+      ctx.fillText('SORRY', cx, cy - 52);
+
+      // Active text
+      ctx.fillStyle = '#E2DFD2';
+      ctx.font = 'bold 18px Georgia';
+      ctx.fillText(`"${PHRASES[curIndex]}"`, cx, cy);
+
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'italic 12px Georgia';
+      ctx.fillText(`Nº ${String(curIndex + 1).padStart(3, '0')}`, cx, cy + 60);
+
+      // Spokes
+      PHRASES.forEach((phrase, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI / num);
+        ctx.save();
+        ctx.translate(cx + rInner * Math.cos(angle), cy + rInner * Math.sin(angle));
+        ctx.rotate(angle);
+        ctx.fillStyle = getSpokeColor(i);
+        ctx.font = '10px Georgia';
+        ctx.textAlign = 'left';
+        ctx.fillText(phrase.toLowerCase(), 0, 0);
+        ctx.restore();
+      });
+
+      tick++;
+      if (tick % 8 === 0 && curIndex < num - 1) {
+        curIndex++;
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
